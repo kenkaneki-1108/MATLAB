@@ -1,0 +1,45 @@
+function plotMyAntropomorfo(P,Rb0,Rb3,DH,q,Q)
+    Rb2 = matrixRT(DH(1:2,:),Rb0);
+    R0b = inv(Rb0);
+    
+    figure(1); hold on; grid on; axis([0 2 0 2 0 2]);
+    xlabel("X"); ylabel("Y"); zlabel("Z");
+
+    P0 = zeros(size(P,1),size(P,2)-1);
+    for i=1:size(P,2)-1
+        p0 = R0b*[P(:,i);1];
+        P0(:,i) = p0(1:3)
+    end
+
+    plot3(P0(1,1),P0(2,1),P0(3,1),'or','LineWidth',2), text(P0(1,1)-0.2,P0(2,1)+0.2,P0(3,1)+0.01,'P1')
+    plot3(P0(1,2),P0(2,2),P0(3,2),'or','LineWidth',2), text(P0(1,2)+0.2,P0(2,2),P0(3,2)+0.01,'P2')
+    plot3(P0(1,3),P0(2,3),P0(3,3),'or','LineWidth',2), text(P0(1,3),P0(2,3)+0.2,P0(3,3)+0.01,'P3')
+    
+    for i = 1:size(Q,2)   
+        T3 = cinematicaDiretta(Rb3,q,Q(:,i));
+    
+        Posb3 = [T3(1:3,4); 1];
+        Pos03 = R0b*Posb3; % P03 = inv(Rb0)*Pb3 = R0b*Pb3
+        X(i) = Pos03(1); Y(i) = Pos03(2); Z(i) = Pos03(3);
+        
+        % Primo braccio, spalla
+        Pr1 = [0 0 0]; 
+
+        % Secondo braccio 
+        T2 = cinematicaDiretta(Rb2,q(1:2),Q(1:2,i));
+
+        Posb2 = [T2(1:3,4); 1];
+        Pr2 = R0b*Posb2;
+        braccio2 = [Pr1; (Pr2(1:3))'];
+        b2 = plot3(braccio2(:,1),braccio2(:,2),braccio2(:,3),"k","linewidth",4);
+        
+        % Terzo braccio
+        braccio3 = [(Pr2(1:3))'; X(i) Y(i) Z(i)];
+        b3 = plot3(braccio3(:,1),braccio3(:,2),braccio3(:,3),"k","linewidth",4);
+        
+        plot3(X(i),Y(i),Z(i),"ob");
+        pause(0.01);
+        delete(b2);
+        delete(b3);
+    end
+end
